@@ -3,8 +3,15 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import api from "../api/client";
 import Navbar from "../components/Navbar";
 import StatusBadge from "../components/StatusBadge";
+import LeafletMapView from "../components/LeafletMapView";
 import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
+
+function parseCoord(v) {
+  if (v === null || v === undefined || v === "") return null;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
+}
 
 const API_URL =
   import.meta.env.VITE_API_URL?.replace("/api", "") || "http://localhost:5000";
@@ -99,6 +106,11 @@ const ReportDetail = () => {
       ["admin", "super_admin"].includes(user.role));
   const isAdmin = user && ["admin", "super_admin"].includes(user.role);
 
+  const lat = parseCoord(report.latitude);
+  const lng = parseCoord(report.longitude);
+  const hasCoords = lat !== null && lng !== null;
+  const showLocationSection = Boolean(report.location || hasCoords);
+
   return (
     <div className="app-layout">
       <Navbar />
@@ -180,22 +192,40 @@ const ReportDetail = () => {
                 </div>
               </div>
 
-              {report.location && (
-                <div className="detail-location">
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                    <circle cx="12" cy="10" r="3" />
-                  </svg>
-                  {report.location}
+              {showLocationSection ? (
+                <div className="report-location-block">
+                  <h3>Lokasi kejadian</h3>
+                  {hasCoords ? (
+                    <>
+                      <LeafletMapView
+                        center={[lat, lng]}
+                        zoom={15}
+                        markerPosition={[lat, lng]}
+                        heightPx={260}
+                        scrollWheelZoom
+                      />
+                      {report.location ? (
+                        <p className="detail-map-caption">{report.location}</p>
+                      ) : null}
+                    </>
+                  ) : (
+                    <div className="detail-location">
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                        <circle cx="12" cy="10" r="3" />
+                      </svg>
+                      {report.location}
+                    </div>
+                  )}
                 </div>
-              )}
+              ) : null}
 
               <div className="detail-description">
                 <h3>Deskripsi Laporan</h3>
@@ -341,20 +371,6 @@ const AdminStatusForm = ({ report, onUpdate, reportId }) => {
         <option value="approved">✅ Disetujui</option>
         <option value="rejected">❌ Ditolak</option>
       </select>
-      <textarea
-        className="form-textarea"
-        placeholder="Catatan admin (opsional)"
-        value={note}
-        onChange={(e) => setNote(e.target.value)}
-        rows={3}
-      />
-      <button
-        className="btn-primary btn-sm"
-        onClick={handleSave}
-        disabled={saving}
-      >
-        {saving ? "Menyimpan..." : "Simpan Status"}
-      </button>
     </div>
   );
 };

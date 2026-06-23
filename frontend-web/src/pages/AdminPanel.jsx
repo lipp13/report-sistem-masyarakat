@@ -117,7 +117,7 @@ const AdminPanel = () => {
       <main className="main-content">
         <div className="admin-page">
           <div className="admin-header">
-            <h1 className="page-title">⚙️ Admin Panel</h1>
+            <h1 className="page-title">⚙️ Super Admin Panel</h1>
             <p className="page-subtitle">Kelola laporan, kategori, dan pengguna</p>
           </div>
 
@@ -150,11 +150,11 @@ const AdminPanel = () => {
                 <tbody>
                   {reports.map((r) => (
                     <tr key={r.id}>
-                      <td><Link to={`/reports/${r.id}`} className="table-link">{r.title}</Link></td>
-                      <td><span className="table-category">{r.category?.icon} {r.category?.name}</span></td>
-                      <td>{r.user?.name}</td>
-                      <td>{new Date(r.created_at).toLocaleDateString('id-ID')}</td>
-                      <td>
+                      <td data-label="Laporan"><Link to={`/reports/${r.id}`} className="table-link">{r.title}</Link></td>
+                      <td data-label="Kategori"><span className="table-category">{r.category?.icon} {r.category?.name}</span></td>
+                      <td data-label="Pelapor">{r.user?.name}</td>
+                      <td data-label="Tanggal">{new Date(r.created_at).toLocaleDateString('id-ID')}</td>
+                      <td data-label="Status">
                         <select
                           className="status-select"
                           value={r.status}
@@ -165,7 +165,7 @@ const AdminPanel = () => {
                           <option value="rejected">❌ Ditolak</option>
                         </select>
                       </td>
-                      <td>
+                      <td data-label="Aksi">
                         <button className="btn-danger-xs" onClick={() => handleDeleteReport(r.id)}>Hapus</button>
                       </td>
                     </tr>
@@ -228,14 +228,14 @@ const AdminPanel = () => {
                 <tbody>
                   {users.map((u) => (
                     <tr key={u.id}>
-                      <td>
+                      <td data-label="Pengguna">
                         <div className="user-cell">
                           <div className="user-avatar-sm">{u.name?.charAt(0)}</div>
                           {u.name}
                         </div>
                       </td>
-                      <td>{u.email}</td>
-                      <td>
+                      <td data-label="Email">{u.email}</td>
+                      <td data-label="Role">
                         {editingUser === u.id ? (
                           <select className="status-select" defaultValue={u.role} onChange={(e) => handleUpdateUserRole(u.id, e.target.value)}>
                             <option value="user">user</option>
@@ -246,13 +246,13 @@ const AdminPanel = () => {
                           <span className={`role-badge role-${u.role}`} onClick={() => setEditingUser(u.id)} style={{ cursor: 'pointer' }}>{u.role}</span>
                         )}
                       </td>
-                      <td>
+                      <td data-label="Status">
                         <button className={`toggle-btn ${u.is_active ? 'active' : 'inactive'}`} onClick={() => handleToggleActive(u)}>
                           {u.is_active ? '✅ Aktif' : '⛔ Nonaktif'}
                         </button>
                       </td>
-                      <td>{new Date(u.created_at).toLocaleDateString('id-ID')}</td>
-                      <td>
+                      <td data-label="Bergabung">{new Date(u.created_at).toLocaleDateString('id-ID')}</td>
+                      <td data-label="Aksi">
                         <button className="btn-danger-xs" onClick={() => handleDeleteUser(u.id)}>Hapus</button>
                       </td>
                     </tr>

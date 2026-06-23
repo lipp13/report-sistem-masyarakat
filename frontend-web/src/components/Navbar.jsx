@@ -32,7 +32,7 @@ const Navbar = () => {
           </Link>
           {(user?.role === 'admin' || user?.role === 'super_admin') && (
             <Link to="/admin" className={`nav-link ${isActive('/admin') ? 'active' : ''}`} onClick={() => setMenuOpen(false)}>
-              Admin Panel
+              Super Admin Panel
             </Link>
           )}
         </div>

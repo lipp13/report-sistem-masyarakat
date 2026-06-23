@@ -3,6 +3,10 @@ import { useNavigate } from "react-router-dom";
 import api from "../api/client";
 import Navbar from "../components/Navbar";
 import toast from "react-hot-toast";
+import LeafletMapView, {
+  DEFAULT_MAP_CENTER,
+  DEFAULT_MAP_ZOOM,
+} from "../components/LeafletMapView";
 
 const CreateReport = () => {
   const navigate = useNavigate();
@@ -13,6 +17,8 @@ const CreateReport = () => {
     location: "",
     category_id: "",
   });
+  /** @type {[number, number] | null} */
+  const [coords, setCoords] = useState(null);
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -54,12 +60,14 @@ const CreateReport = () => {
 
     const formData = new FormData();
     Object.entries(form).forEach(([k, v]) => formData.append(k, v));
+    if (coords) {
+      formData.append("latitude", String(coords[0]));
+      formData.append("longitude", String(coords[1]));
+    }
     if (image) formData.append("image", image);
 
     try {
-      const res = await api.post("/reports", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const res = await api.post("/reports", formData);
       toast.success("Laporan berhasil dikirim!");
       navigate(`/reports/${res.data.data.id}`);
     } catch (err) {
@@ -136,7 +144,25 @@ const CreateReport = () => {
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Lokasi Kejadian</label>
+                  <label className="form-label">Lokasi di peta</label>
+                  <p className="form-map-hint">
+                    Klik peta untuk menandai lokasi (opsional). Seret pin untuk
+                    menyesuaikan.
+                  </p>
+                  <LeafletMapView
+                    center={coords ?? DEFAULT_MAP_CENTER}
+                    zoom={coords ? 15 : DEFAULT_MAP_ZOOM}
+                    markerPosition={coords}
+                    onMapClick={setCoords}
+                    onMarkerDragEnd={setCoords}
+                    heightPx={280}
+                  />
+                  <label
+                    className="form-label"
+                    style={{ marginTop: "0.85rem" }}
+                  >
+                    Keterangan alamat (opsional)
+                  </label>
                   <div className="input-wrapper">
                     <svg
                       className="input-icon"
@@ -153,7 +179,7 @@ const CreateReport = () => {
                     <input
                       type="text"
                       className="form-input"
-                      placeholder="Contoh: Jl. Sudirman No. 1, Jakarta"
+                      placeholder="Contoh: patokan di sebelah minimarket"
                       value={form.location}
                       onChange={(e) =>
                         setForm({ ...form, location: e.target.value })

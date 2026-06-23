@@ -3,6 +3,15 @@ const { Op } = require('sequelize');
 const path = require('path');
 const fs = require('fs');
 
+const uploadsAbsoluteDir = path.join(__dirname, '../../uploads');
+
+function resolveUploadDiskPath(imageUrl) {
+  if (!imageUrl || typeof imageUrl !== 'string') return null;
+  const normalized = imageUrl.replace(/^\/uploads\/?/, '').replace(/^\//, '');
+  if (!normalized || normalized.includes('..')) return null;
+  return path.join(uploadsAbsoluteDir, normalized);
+}
+
 // GET /api/reports
 const getAllReports = async (req, res) => {
   try {
@@ -141,8 +150,8 @@ const updateReport = async (req, res) => {
     if (req.file) {
       // Delete old image
       if (report.image_url) {
-        const oldPath = path.join(__dirname, '../../', report.image_url);
-        if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+        const oldPath = resolveUploadDiskPath(report.image_url);
+        if (oldPath && fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
       }
       report.image_url = `/uploads/${req.file.filename}`;
     }
@@ -195,8 +204,8 @@ const deleteReport = async (req, res) => {
 
     // Delete image
     if (report.image_url) {
-      const imgPath = path.join(__dirname, '../../', report.image_url);
-      if (fs.existsSync(imgPath)) fs.unlinkSync(imgPath);
+      const imgPath = resolveUploadDiskPath(report.image_url);
+      if (imgPath && fs.existsSync(imgPath)) fs.unlinkSync(imgPath);
     }
 
     await report.destroy();
