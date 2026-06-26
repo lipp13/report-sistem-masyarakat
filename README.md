@@ -17,4 +17,4 @@ If you are developing a production application, we recommend using TypeScript wi
 
 ## 🌐 Live Demo Website
 
-[![Live Demo](https://img.shields.io/badge/Live-Demo-green?style=for-the-badge)]([https://coffe-shop-platfrom.netlify.app/](https://report-sistem-masyarakat-xmc5.vercel.app/))
+[![Live Demo](https://img.shields.io/badge/Live-Demo-green?style=for-the-badge)](https://report-sistem-masyarakat-xmc5.vercel.app/)
