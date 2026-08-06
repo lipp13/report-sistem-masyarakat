@@ -1,0 +1,19 @@
+# Dependencies
+**/node_modules/
+node_modules/
+
+# Environment & local files
+**/.env
+**/.env.local
+.env
+*.sqlite
+backend/database.sqlite
+
+# Build outputs
+**/dist/
+**/web-dist/
+**/.expo/
+
+# System / OS
+.DS_Store
+Thumbs.db

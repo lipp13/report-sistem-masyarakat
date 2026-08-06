@@ -1,4 +1,4 @@
-const { Report, User, Category, Comment } = require('../models');
+const { Report, User, Category, Comment, ReportVote } = require('../models');
 const { Op } = require('sequelize');
 const path = require('path');
 const fs = require('fs');
@@ -15,13 +15,19 @@ function resolveUploadDiskPath(imageUrl) {
 // GET /api/reports
 const getAllReports = async (req, res) => {
   try {
-    const { page = 1, limit = 10, status, category_id, search, user_id } = req.query;
+    const { page = 1, limit = 10, status, category_id, search, user_id, sort = 'latest' } = req.query;
     const offset = (page - 1) * limit;
     const where = {};
 
-    if (status) where.status = status;
-    if (category_id) where.category_id = category_id;
-    if (user_id) where.user_id = user_id;
+    if (status && status !== 'all') {
+      where.status = status;
+    }
+    if (category_id && category_id !== 'all') {
+      where.category_id = category_id;
+    }
+    if (user_id) {
+      where.user_id = user_id;
+    }
     if (search) {
       where[Op.or] = [
         { title: { [Op.like]: `%${search}%` } },
@@ -30,20 +36,40 @@ const getAllReports = async (req, res) => {
       ];
     }
 
+    let order = [['created_at', 'DESC']];
+    if (sort === 'popular') {
+      order = [['votes_count', 'DESC'], ['created_at', 'DESC']];
+    } else if (sort === 'oldest') {
+      order = [['created_at', 'ASC']];
+    }
+
+    const currentUserId = req.user ? req.user.id : null;
+
     const { count, rows } = await Report.findAndCountAll({
       where,
       include: [
-        { model: User, as: 'user', attributes: ['id', 'name', 'email', 'avatar'] },
+        { model: User, as: 'user', attributes: ['id', 'name', 'email', 'avatar', 'role'] },
         { model: Category, as: 'category', attributes: ['id', 'name', 'icon', 'color'] },
+        ...(currentUserId
+          ? [{ model: ReportVote, as: 'votes', where: { user_id: currentUserId }, required: false }]
+          : []),
       ],
       limit: parseInt(limit),
       offset: parseInt(offset),
-      order: [['created_at', 'DESC']],
+      order,
+      distinct: true,
+    });
+
+    const formattedRows = rows.map((report) => {
+      const plainObj = report.get({ plain: true });
+      plainObj.has_voted = currentUserId ? (plainObj.votes && plainObj.votes.length > 0) : false;
+      delete plainObj.votes;
+      return plainObj;
     });
 
     return res.status(200).json({
       success: true,
-      data: rows,
+      data: formattedRows,
       pagination: {
         total: count,
         page: parseInt(page),
@@ -84,16 +110,18 @@ const createReport = async (req, res) => {
       latitude: latitude === undefined || latitude === '' ? null : latitude,
       longitude: longitude === undefined || longitude === '' ? null : longitude,
       image_url,
+      status: 'pending',
+      votes_count: 0,
     });
 
     const fullReport = await Report.findByPk(report.id, {
       include: [
-        { model: User, as: 'user', attributes: ['id', 'name', 'email', 'avatar'] },
+        { model: User, as: 'user', attributes: ['id', 'name', 'email', 'avatar', 'role'] },
         { model: Category, as: 'category', attributes: ['id', 'name', 'icon', 'color'] },
       ],
     });
 
-    return res.status(201).json({ success: true, message: 'Report created.', data: fullReport });
+    return res.status(201).json({ success: true, message: 'Report created successfully.', data: fullReport });
   } catch (error) {
     if (req.file) fs.unlinkSync(req.file.path);
     console.error('Create report error:', error);
@@ -104,22 +132,31 @@ const createReport = async (req, res) => {
 // GET /api/reports/:id
 const getReportById = async (req, res) => {
   try {
+    const currentUserId = req.user ? req.user.id : null;
+
     const report = await Report.findByPk(req.params.id, {
       include: [
-        { model: User, as: 'user', attributes: ['id', 'name', 'email', 'avatar'] },
+        { model: User, as: 'user', attributes: ['id', 'name', 'email', 'avatar', 'role'] },
         { model: Category, as: 'category', attributes: ['id', 'name', 'icon', 'color'] },
         {
           model: Comment,
           as: 'comments',
-          include: [{ model: User, as: 'user', attributes: ['id', 'name', 'avatar'] }],
+          include: [{ model: User, as: 'user', attributes: ['id', 'name', 'avatar', 'role'] }],
           order: [['created_at', 'ASC']],
         },
+        ...(currentUserId
+          ? [{ model: ReportVote, as: 'votes', where: { user_id: currentUserId }, required: false }]
+          : []),
       ],
     });
 
     if (!report) return res.status(404).json({ success: false, message: 'Report not found.' });
 
-    return res.status(200).json({ success: true, data: report });
+    const plainObj = report.get({ plain: true });
+    plainObj.has_voted = currentUserId ? (plainObj.votes && plainObj.votes.length > 0) : false;
+    delete plainObj.votes;
+
+    return res.status(200).json({ success: true, data: plainObj });
   } catch (error) {
     console.error('Get report error:', error);
     return res.status(500).json({ success: false, message: 'Internal server error.' });
@@ -132,7 +169,6 @@ const updateReport = async (req, res) => {
     const report = await Report.findByPk(req.params.id);
     if (!report) return res.status(404).json({ success: false, message: 'Report not found.' });
 
-    // Only owner or admin can update
     const isOwner = report.user_id === req.user.id;
     const isAdmin = ['admin', 'super_admin'].includes(req.user.role);
     if (!isOwner && !isAdmin) {
@@ -148,7 +184,6 @@ const updateReport = async (req, res) => {
     if (longitude !== undefined) report.longitude = longitude === '' ? null : longitude;
     if (category_id) report.category_id = category_id;
     if (req.file) {
-      // Delete old image
       if (report.image_url) {
         const oldPath = resolveUploadDiskPath(report.image_url);
         if (oldPath && fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
@@ -170,10 +205,10 @@ const updateReport = async (req, res) => {
 const updateStatus = async (req, res) => {
   try {
     const { status, admin_note } = req.body;
-    const allowed = ['pending', 'approved', 'rejected'];
+    const allowed = ['pending', 'in_progress', 'resolved', 'rejected', 'approved'];
 
     if (!status || !allowed.includes(status)) {
-      return res.status(400).json({ success: false, message: 'Status must be pending, approved, or rejected.' });
+      return res.status(400).json({ success: false, message: 'Status must be pending, in_progress, resolved, rejected, or approved.' });
     }
 
     const report = await Report.findByPk(req.params.id);
@@ -190,6 +225,47 @@ const updateStatus = async (req, res) => {
   }
 };
 
+// POST /api/reports/:id/vote
+const toggleVoteReport = async (req, res) => {
+  try {
+    const reportId = req.params.id;
+    const userId = req.user.id;
+
+    const report = await Report.findByPk(reportId);
+    if (!report) return res.status(404).json({ success: false, message: 'Report not found.' });
+
+    const existingVote = await ReportVote.findOne({
+      where: { report_id: reportId, user_id: userId },
+    });
+
+    let hasVoted = false;
+    if (existingVote) {
+      await existingVote.destroy();
+      report.votes_count = Math.max(0, (report.votes_count || 0) - 1);
+      hasVoted = false;
+    } else {
+      await ReportVote.create({ report_id: reportId, user_id: userId });
+      report.votes_count = (report.votes_count || 0) + 1;
+      hasVoted = true;
+    }
+
+    await report.save();
+
+    return res.status(200).json({
+      success: true,
+      message: hasVoted ? 'Dukungan berhasil ditambahkan.' : 'Dukungan dibatalkan.',
+      data: {
+        report_id: report.id,
+        votes_count: report.votes_count,
+        has_voted: hasVoted,
+      },
+    });
+  } catch (error) {
+    console.error('Toggle vote error:', error);
+    return res.status(500).json({ success: false, message: 'Internal server error.' });
+  }
+};
+
 // DELETE /api/reports/:id
 const deleteReport = async (req, res) => {
   try {
@@ -202,7 +278,6 @@ const deleteReport = async (req, res) => {
       return res.status(403).json({ success: false, message: 'Access denied.' });
     }
 
-    // Delete image
     if (report.image_url) {
       const imgPath = resolveUploadDiskPath(report.image_url);
       if (imgPath && fs.existsSync(imgPath)) fs.unlinkSync(imgPath);
@@ -219,20 +294,43 @@ const deleteReport = async (req, res) => {
 // GET /api/reports/stats
 const getStats = async (req, res) => {
   try {
-    const [total, pending, approved, rejected] = await Promise.all([
+    const [total, pending, in_progress, resolved, rejected, approved] = await Promise.all([
       Report.count(),
       Report.count({ where: { status: 'pending' } }),
-      Report.count({ where: { status: 'approved' } }),
+      Report.count({ where: { status: 'in_progress' } }),
+      Report.count({ where: { status: 'resolved' } }),
       Report.count({ where: { status: 'rejected' } }),
+      Report.count({ where: { status: 'approved' } }),
     ]);
+
+    const completed = resolved + approved;
+    const resolutionRate = total > 0 ? Math.round((completed / total) * 100) : 0;
 
     return res.status(200).json({
       success: true,
-      data: { total, pending, approved, rejected },
+      data: {
+        total,
+        pending,
+        in_progress,
+        resolved,
+        rejected,
+        approved,
+        completed,
+        resolution_rate: resolutionRate,
+      },
     });
   } catch (error) {
     return res.status(500).json({ success: false, message: 'Internal server error.' });
   }
 };
 
-module.exports = { getAllReports, createReport, getReportById, updateReport, updateStatus, deleteReport, getStats };
+module.exports = {
+  getAllReports,
+  createReport,
+  getReportById,
+  updateReport,
+  updateStatus,
+  toggleVoteReport,
+  deleteReport,
+  getStats,
+};

@@ -42,12 +42,16 @@ const Report = sequelize.define(
       allowNull: true,
     },
     status: {
-      type: DataTypes.ENUM('pending', 'approved', 'rejected'),
+      type: DataTypes.ENUM('pending', 'in_progress', 'resolved', 'rejected', 'approved'),
       defaultValue: 'pending',
     },
     admin_note: {
       type: DataTypes.TEXT,
       allowNull: true,
+    },
+    votes_count: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
     },
   },
   {

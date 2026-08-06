@@ -45,4 +45,24 @@ const verifyToken = async (req, res, next) => {
   }
 };
 
+const optionalAuth = async (req, res, next) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.substring(7);
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const user = await User.findByPk(decoded.id, {
+        attributes: { exclude: ['password'] },
+      });
+      if (user && user.is_active) {
+        req.user = user;
+      }
+    }
+  } catch (error) {
+    // Ignore invalid optional tokens
+  }
+  next();
+};
+
 module.exports = verifyToken;
+module.exports.optionalAuth = optionalAuth;

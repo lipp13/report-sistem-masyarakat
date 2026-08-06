@@ -7,6 +7,7 @@ import LeafletMapView, {
   DEFAULT_MAP_CENTER,
   DEFAULT_MAP_ZOOM,
 } from "../components/LeafletMapView";
+import { MapPin, Navigation, ArrowLeft, Upload, Camera, Image as ImageIcon, Trash2, FileCheck } from "lucide-react";
 
 const CreateReport = () => {
   const navigate = useNavigate();
@@ -21,8 +22,10 @@ const CreateReport = () => {
   const [coords, setCoords] = useState(null);
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
+  const [fileDetails, setFileDetails] = useState(null);
   const [loading, setLoading] = useState(false);
   const [dragging, setDragging] = useState(false);
+  const [geolocating, setGeolocating] = useState(false);
 
   useEffect(() => {
     api
@@ -33,11 +36,26 @@ const CreateReport = () => {
 
   const handleImageChange = (file) => {
     if (!file) return;
+    const allowedExts = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'heic', 'heif', 'bmp'];
+    const ext = file.name.split('.').pop()?.toLowerCase();
+    
     if (file.size > 5 * 1024 * 1024) {
-      toast.error("Ukuran file max 5MB");
+      toast.error("Ukuran file maksimal 5MB.");
       return;
     }
+
+    if (ext && !allowedExts.includes(ext) && !file.type.startsWith('image/')) {
+      toast.error("Format file harus berupa gambar (.png, .jpg, .jpeg, .webp, dll).");
+      return;
+    }
+
     setImage(file);
+    setFileDetails({
+      name: file.name,
+      size: (file.size / (1024 * 1024)).toFixed(2) + " MB",
+      type: ext?.toUpperCase() || 'IMG',
+    });
+
     const reader = new FileReader();
     reader.onloadend = () => setPreview(reader.result);
     reader.readAsDataURL(file);
@@ -50,10 +68,38 @@ const CreateReport = () => {
     if (file) handleImageChange(file);
   };
 
+  const clearImage = (e) => {
+    if (e) e.stopPropagation();
+    setImage(null);
+    setPreview(null);
+    setFileDetails(null);
+  };
+
+  const handleGetCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error("Browser Anda tidak mendukung fitur Geolocation.");
+      return;
+    }
+    setGeolocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        setCoords([latitude, longitude]);
+        toast.success("Lokasi GPS berhasil didapatkan!");
+        setGeolocating(false);
+      },
+      (err) => {
+        toast.error("Gagal mendapatkan lokasi GPS: " + err.message);
+        setGeolocating(false);
+      },
+      { enableHighAccuracy: true }
+    );
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.category_id) {
-      toast.error("Pilih kategori terlebih dahulu");
+      toast.error("Pilih kategori pengaduan terlebih dahulu.");
       return;
     }
     setLoading(true);
@@ -68,10 +114,10 @@ const CreateReport = () => {
 
     try {
       const res = await api.post("/reports", formData);
-      toast.success("Laporan berhasil dikirim!");
+      toast.success("Laporan Anda berhasil dikirim!");
       navigate(`/reports/${res.data.data.id}`);
     } catch (err) {
-      toast.error(err.response?.data?.message || "Gagal mengirim laporan");
+      toast.error(err.response?.data?.message || "Gagal mengirim laporan.");
     } finally {
       setLoading(false);
     }
@@ -84,21 +130,12 @@ const CreateReport = () => {
         <div className="form-page">
           <div className="form-page-header">
             <button className="back-btn" onClick={() => navigate(-1)}>
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path d="M19 12H5M12 19l-7-7 7-7" />
-              </svg>
-              Kembali
+              <ArrowLeft size={18} />
+              <span>Kembali</span>
             </button>
-            <div>
-              <h1 className="page-title">Buat Laporan Baru</h1>
-              <p className="page-subtitle">Sampaikan pengaduanmu kepada kami</p>
+            <div className="header-text-group">
+              <h1 className="page-title">Buat Laporan Pengaduan</h1>
+              <p className="page-subtitle">Sampaikan pengaduan fasilitas publik Anda beserta foto bukti (.png, .jpg, .webp)</p>
             </div>
           </div>
 
@@ -112,7 +149,7 @@ const CreateReport = () => {
                   <input
                     type="text"
                     className="form-input"
-                    placeholder="Deskripsikan masalah secara singkat"
+                    placeholder="Contoh: Jalan berlubang di Jl. Sudirman No. 45"
                     value={form.title}
                     onChange={(e) =>
                       setForm({ ...form, title: e.target.value })
@@ -125,7 +162,7 @@ const CreateReport = () => {
 
                 <div className="form-group">
                   <label className="form-label">
-                    Kategori <span className="required">*</span>
+                    Kategori Pengaduan <span className="required">*</span>
                   </label>
                   <div className="category-grid">
                     {categories.map((c) => (
@@ -144,10 +181,31 @@ const CreateReport = () => {
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Lokasi di peta</label>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                    <label className="form-label" style={{ margin: 0 }}>Lokasi di Peta</label>
+                    <button
+                      type="button"
+                      onClick={handleGetCurrentLocation}
+                      disabled={geolocating}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.4rem',
+                        background: 'rgba(137, 180, 250, 0.15)',
+                        color: 'var(--lm-blue)',
+                        border: '1px solid rgba(137, 180, 250, 0.3)',
+                        borderRadius: 'var(--lm-radius-sm)',
+                        padding: '0.3rem 0.65rem',
+                        fontSize: '0.78rem',
+                        fontWeight: 600,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      <Navigation size={13} /> {geolocating ? "Mengambil GPS..." : "Gunakan Lokasi Saya"}
+                    </button>
+                  </div>
                   <p className="form-map-hint">
-                    Klik peta untuk menandai lokasi (opsional). Seret pin untuk
-                    menyesuaikan.
+                    Klik peta untuk menandai titik presisi kejadian. Seret penanda (pin) jika perlu.
                   </p>
                   <LeafletMapView
                     center={coords ?? DEFAULT_MAP_CENTER}
@@ -157,29 +215,16 @@ const CreateReport = () => {
                     onMarkerDragEnd={setCoords}
                     heightPx={280}
                   />
-                  <label
-                    className="form-label"
-                    style={{ marginTop: "0.85rem" }}
-                  >
-                    Keterangan alamat (opsional)
+
+                  <label className="form-label" style={{ marginTop: "0.85rem" }}>
+                    Keterangan Alamat / Patokan (opsional)
                   </label>
                   <div className="input-wrapper">
-                    <svg
-                      className="input-icon"
-                      width="18"
-                      height="18"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
-                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                      <circle cx="12" cy="10" r="3" />
-                    </svg>
+                    <MapPin className="input-icon" size={18} />
                     <input
                       type="text"
                       className="form-input"
-                      placeholder="Contoh: patokan di sebelah minimarket"
+                      placeholder="Contoh: Di depan halte busway / dekat Pos RW 05"
                       value={form.location}
                       onChange={(e) =>
                         setForm({ ...form, location: e.target.value })
@@ -194,7 +239,7 @@ const CreateReport = () => {
                   </label>
                   <textarea
                     className="form-textarea"
-                    placeholder="Jelaskan detail permasalahan, kapan terjadi, dampak yang ditimbulkan, dll."
+                    placeholder="Jelaskan secara rinci mengenai masalah ini, kronologi, waktu kejadian, serta dampaknya pada warga..."
                     value={form.description}
                     onChange={(e) =>
                       setForm({ ...form, description: e.target.value })
@@ -205,11 +250,26 @@ const CreateReport = () => {
                 </div>
               </div>
 
+              {/* Upload Column */}
               <div className="form-column">
                 <div className="form-group">
-                  <label className="form-label">Foto Bukti (opsional)</label>
+                  <label className="form-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span>Unggah Foto Bukti Kejadian</span>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--lm-blue)', fontWeight: 600 }}>Support .PNG, .JPG, .WEBP</span>
+                  </label>
+
                   <div
                     className={`dropzone ${dragging ? "dragging" : ""} ${preview ? "has-image" : ""}`}
+                    style={{
+                      border: '2px dashed var(--lm-surface2)',
+                      borderRadius: 'var(--lm-radius)',
+                      padding: preview ? '1rem' : '2rem 1.5rem',
+                      background: 'var(--lm-surface0)',
+                      textAlign: 'center',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      position: 'relative'
+                    }}
                     onDragOver={(e) => {
                       e.preventDefault();
                       setDragging(true);
@@ -221,57 +281,103 @@ const CreateReport = () => {
                     }
                   >
                     {preview ? (
-                      <>
-                        <img
-                          src={preview}
-                          alt="Preview"
-                          className="image-preview"
-                        />
-                        <button
-                          type="button"
-                          className="remove-image"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setImage(null);
-                            setPreview(null);
-                          }}
-                        >
-                          ✕
-                        </button>
-                      </>
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}>
+                        <div style={{ position: 'relative', width: '100%', maxHeight: '240px', overflow: 'hidden', borderRadius: 'var(--lm-radius-sm)' }}>
+                          <img
+                            src={preview}
+                            alt="Preview Bukti Laporan"
+                            style={{ width: '100%', height: '220px', objectFit: 'cover' }}
+                          />
+                          <button
+                            type="button"
+                            onClick={clearImage}
+                            style={{
+                              position: 'absolute',
+                              top: '8px',
+                              right: '8px',
+                              background: 'rgba(243, 139, 168, 0.9)',
+                              color: '#fff',
+                              border: 'none',
+                              borderRadius: '50%',
+                              width: '28px',
+                              height: '28px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              cursor: 'pointer',
+                              boxShadow: '0 4px 10px rgba(0,0,0,0.4)'
+                            }}
+                            title="Hapus foto"
+                          >
+                            ✕
+                          </button>
+                        </div>
+
+                        {fileDetails && (
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', background: 'var(--lm-mantle)', padding: '0.5rem 0.75rem', borderRadius: 'var(--lm-radius-sm)', border: '1px solid var(--lm-surface1)', fontSize: '0.8rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', overflow: 'hidden' }}>
+                              <FileCheck size={16} color="var(--lm-green)" />
+                              <span style={{ fontWeight: 600, color: 'var(--lm-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '160px' }}>
+                                {fileDetails.name}
+                              </span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                              <span style={{ background: 'rgba(137, 180, 250, 0.2)', color: 'var(--lm-blue)', padding: '0.1rem 0.4rem', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 700 }}>
+                                {fileDetails.type}
+                              </span>
+                              <span style={{ color: 'var(--lm-subtext0)' }}>{fileDetails.size}</span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     ) : (
-                      <div className="dropzone-content">
-                        <div className="dropzone-icon">📸</div>
-                        <p className="dropzone-text">
-                          Drag & drop atau klik untuk upload
-                        </p>
-                        <p className="dropzone-hint">JPG, PNG, WebP max 5MB</p>
+                      <div className="dropzone-content" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}>
+                        <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(137, 180, 250, 0.15)', color: 'var(--lm-blue)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <Upload size={26} />
+                        </div>
+                        <div>
+                          <p style={{ margin: '0 0 0.25rem', fontWeight: 700, fontSize: '0.95rem', color: 'var(--lm-text)' }}>
+                            Tarik & Lepas Foto di Sini
+                          </p>
+                          <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--lm-subtext0)' }}>
+                            atau klik untuk jelajahi berkas galeri/kamera
+                          </p>
+                        </div>
+                        <div style={{ display: 'flex', gap: '0.4rem', marginTop: '0.25rem' }}>
+                          {['.PNG', '.JPG', '.JPEG', '.WEBP', '.HEIC'].map((ext) => (
+                            <span key={ext} style={{ background: 'var(--lm-surface1)', color: 'var(--lm-subtext0)', padding: '0.15rem 0.4rem', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 600 }}>
+                              {ext}
+                            </span>
+                          ))}
+                        </div>
                       </div>
                     )}
                   </div>
+
                   <input
                     id="imageInput"
                     type="file"
-                    accept="image/*"
+                    accept="image/*,.png,.jpg,.jpeg,.gif,.webp,.heic,.heif,.bmp"
                     className="hidden"
+                    style={{ display: 'none' }}
                     onChange={(e) => handleImageChange(e.target.files[0])}
                   />
                 </div>
 
                 <div className="info-box">
-                  <h4>💡 Tips Laporan yang Baik</h4>
+                  <h4>💡 Panduan Laporan Efektif</h4>
                   <ul>
-                    <li>Gunakan judul yang jelas dan spesifik</li>
-                    <li>Pilih kategori yang sesuai</li>
-                    <li>Sertakan lokasi yang tepat</li>
-                    <li>Tambahkan foto sebagai bukti</li>
-                    <li>Jelaskan dampak permasalahan</li>
+                    <li>Gunakan judul singkat yang mendeskripsikan inti masalah</li>
+                    <li>Pilih kategori yang paling sesuai</li>
+                    <li>Gunakan tombol GPS atau tentukan titik lokasi pada peta</li>
+                    <li>Sertakan foto bukti kondisi di lapangan (PNG/JPG/WEBP)</li>
+                    <li>Jelaskan detail untuk mempercepat tindakan petugas</li>
                   </ul>
                 </div>
               </div>
             </div>
 
-            <div className="form-actions">
+            <div className="form-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '1.5rem' }}>
               <button
                 type="button"
                 className="btn-secondary"
@@ -282,10 +388,10 @@ const CreateReport = () => {
               <button type="submit" className="btn-primary" disabled={loading}>
                 {loading ? (
                   <>
-                    <span className="btn-spinner"></span> Mengirim...
+                    <span className="btn-spinner"></span> Mengirim Laporan...
                   </>
                 ) : (
-                  "📤 Kirim Laporan"
+                  "Kirim Laporan Pengaduan"
                 )}
               </button>
             </div>
