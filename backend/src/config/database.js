@@ -2,23 +2,33 @@ const { Sequelize } = require('sequelize');
 const path = require('path');
 require('dotenv').config();
 
-const dbDialect = process.env.DB_DIALECT || 'mysql';
+const dbDialect = (process.env.DB_DIALECT || 'mysql').toLowerCase();
 
 let sequelize;
 
 if (dbDialect === 'sqlite') {
-  sequelize = new Sequelize({
-    dialect: 'sqlite',
-    storage: path.join(__dirname, '../../database.sqlite'),
-    logging: false,
-  });
+  try {
+    sequelize = new Sequelize({
+      dialect: 'sqlite',
+      storage: path.join(__dirname, '../../database.sqlite'),
+      logging: false,
+    });
+  } catch (err) {
+    console.warn('⚠️ Could not initialize SQLite dialect, falling back to MySQL config:', err.message);
+    sequelize = createMysqlSequelize();
+  }
 } else {
-  sequelize = new Sequelize(
+  sequelize = createMysqlSequelize();
+}
+
+function createMysqlSequelize() {
+  return new Sequelize(
     process.env.DB_NAME || 'pengaduan_masyarakat',
     process.env.DB_USER || 'root',
     process.env.DB_PASSWORD !== undefined ? process.env.DB_PASSWORD : '',
     {
       host: process.env.DB_HOST || 'localhost',
+      port: process.env.DB_PORT || 3306,
       dialect: 'mysql',
       logging: false,
       pool: {
