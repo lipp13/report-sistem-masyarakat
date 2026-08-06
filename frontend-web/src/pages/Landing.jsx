@@ -63,13 +63,13 @@ export default function Landing() {
 
       <main className="landing-main">
         {/* Hero Section */}
-        <section className="landing-hero">
+        <section className="landing-hero animate-fade-in">
           <p className="landing-kicker">
             <ShieldCheck size={16} className="inline-icon" /> Portal Layanan Pengaduan Masyarakat Transparan
           </p>
           <h1 className="landing-headline">
             Laporkan masalah lingkunganmu,
-            <span className="landing-accent"> pantau penangannya </span>
+            <span className="landing-accent"> pantau penanganannya </span>
             secara real-time.
           </h1>
           <p className="landing-lead">
@@ -77,7 +77,7 @@ export default function Landing() {
           </p>
           <div className="landing-cta-row">
             <Link to="/register" className="btn-primary landing-cta-primary">
-              Mulai Laporkan <ArrowRight size={18} />
+              Mulai Laporkan <ArrowRight size={20} />
             </Link>
             <Link to="/login" className="btn-secondary landing-cta-secondary">
               Sudah Punya Akun?
@@ -86,40 +86,40 @@ export default function Landing() {
         </section>
 
         {/* Live Counter Stats */}
-        <section className="stats-ticker-section" style={{ margin: '3rem 0', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.25rem' }}>
-          <div className="stat-card" style={{ background: 'rgba(30, 30, 46, 0.6)', backdropFilter: 'blur(12px)', border: '1px solid var(--lm-surface1)', padding: '1.25rem', borderRadius: 'var(--lm-radius)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-              <div style={{ background: 'rgba(137, 180, 250, 0.15)', color: 'var(--lm-blue)', padding: '0.6rem', borderRadius: '10px' }}><Zap size={22} /></div>
+        <section className="landing-stats-grid animate-fade-in animate-delay-1">
+          <div className="stat-card stat-card-glass">
+            <div className="stat-card-inner">
+              <div className="stat-icon-wrapper stat-icon-blue"><Zap size={22} /></div>
               <div>
-                <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--lm-text)' }}>{stats.total || 0}</div>
-                <div style={{ fontSize: '0.85rem', color: 'var(--lm-subtext0)' }}>Total Pengaduan</div>
+                <div className="stat-number">{stats.total || 0}</div>
+                <div className="stat-label-text">Total Pengaduan</div>
               </div>
             </div>
           </div>
 
-          <div className="stat-card" style={{ background: 'rgba(30, 30, 46, 0.6)', backdropFilter: 'blur(12px)', border: '1px solid var(--lm-surface1)', padding: '1.25rem', borderRadius: 'var(--lm-radius)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-              <div style={{ background: 'rgba(166, 227, 161, 0.15)', color: 'var(--lm-green)', padding: '0.6rem', borderRadius: '10px' }}><CheckCircle2 size={22} /></div>
+          <div className="stat-card stat-card-glass">
+            <div className="stat-card-inner">
+              <div className="stat-icon-wrapper stat-icon-green"><CheckCircle2 size={22} /></div>
               <div>
-                <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--lm-green)' }}>{stats.completed || 0}</div>
-                <div style={{ fontSize: '0.85rem', color: 'var(--lm-subtext0)' }}>Selesai Ditangani</div>
+                <div className="stat-number stat-green">{stats.completed || 0}</div>
+                <div className="stat-label-text">Selesai Ditangani</div>
               </div>
             </div>
           </div>
 
-          <div className="stat-card" style={{ background: 'rgba(30, 30, 46, 0.6)', backdropFilter: 'blur(12px)', border: '1px solid var(--lm-surface1)', padding: '1.25rem', borderRadius: 'var(--lm-radius)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-              <div style={{ background: 'rgba(180, 190, 254, 0.15)', color: 'var(--lm-lavender)', padding: '0.6rem', borderRadius: '10px' }}><Users size={22} /></div>
+          <div className="stat-card stat-card-glass">
+            <div className="stat-card-inner">
+              <div className="stat-icon-wrapper stat-icon-lavender"><Users size={22} /></div>
               <div>
-                <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--lm-lavender)' }}>{stats.resolution_rate || 90}%</div>
-                <div style={{ fontSize: '0.85rem', color: 'var(--lm-subtext0)' }}>Tingkat Penyelesaian</div>
+                <div className="stat-number stat-lavender">{stats.resolution_rate || 90}%</div>
+                <div className="stat-label-text">Tingkat Penyelesaian</div>
               </div>
             </div>
           </div>
         </section>
 
         {/* Feature Highlights */}
-        <section className="landing-features" aria-labelledby="landing-features-title">
+        <section className="landing-features animate-fade-in animate-delay-2" aria-labelledby="landing-features-title">
           <h2 id="landing-features-title" className="landing-features-title">
             Mengapa Memilih LaporMas?
           </h2>
@@ -143,54 +143,47 @@ export default function Landing() {
         </section>
 
         {/* Step-by-Step Guide */}
-        <section style={{ margin: '4rem 0 3rem' }}>
-          <h2 style={{ textAlign: 'center', fontSize: '1.6rem', fontWeight: 700, marginBottom: '2rem' }}>
+        <section className="landing-steps-section animate-fade-in animate-delay-3">
+          <h2 className="section-title-center">
             3 Langkah Mudah Pelaporan
           </h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem' }}>
-            <div style={{ background: 'var(--lm-surface0)', padding: '1.5rem', borderRadius: 'var(--lm-radius)', border: '1px solid var(--lm-surface1)' }}>
-              <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--lm-blue)', color: 'var(--lm-base)', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>1</div>
-              <h4 style={{ margin: '0 0 0.5rem', fontSize: '1.1rem' }}>Kirim Laporan</h4>
-              <p style={{ margin: 0, color: 'var(--lm-subtext0)', fontSize: '0.9rem' }}>Isi formulir pengaduan dengan memilih kategori, lokasi peta, dan mengunggah foto bukti.</p>
+          <div className="steps-grid">
+            <div className="step-card">
+              <div className="step-number step-number-1">1</div>
+              <h4>Kirim Laporan</h4>
+              <p>Isi formulir pengaduan dengan memilih kategori, lokasi peta, dan mengunggah foto bukti.</p>
             </div>
-            <div style={{ background: 'var(--lm-surface0)', padding: '1.5rem', borderRadius: 'var(--lm-radius)', border: '1px solid var(--lm-surface1)' }}>
-              <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--lm-teal)', color: 'var(--lm-base)', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>2</div>
-              <h4 style={{ margin: '0 0 0.5rem', fontSize: '1.1rem' }}>Proses Verifikasi</h4>
-              <p style={{ margin: 0, color: 'var(--lm-subtext0)', fontSize: '0.9rem' }}>Admin memverifikasi laporan dan mendisposisikan ke dinas/petugas teknis yang berwenang.</p>
+            <div className="step-card">
+              <div className="step-number step-number-2">2</div>
+              <h4>Proses Verifikasi</h4>
+              <p>Admin memverifikasi laporan dan mendisposisikan ke dinas/petugas teknis yang berwenang.</p>
             </div>
-            <div style={{ background: 'var(--lm-surface0)', padding: '1.5rem', borderRadius: 'var(--lm-radius)', border: '1px solid var(--lm-surface1)' }}>
-              <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--lm-green)', color: 'var(--lm-base)', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>3</div>
-              <h4 style={{ margin: '0 0 0.5rem', fontSize: '1.1rem' }}>Penanganan Tuntas</h4>
-              <p style={{ margin: 0, color: 'var(--lm-subtext0)', fontSize: '0.9rem' }}>Petugas menyelesaikan masalah di lokasi dan memberikan tanggapan resmi beserta foto hasil.</p>
+            <div className="step-card">
+              <div className="step-number step-number-3">3</div>
+              <h4>Penanganan Tuntas</h4>
+              <p>Petugas menyelesaikan masalah di lokasi dan memberikan tanggapan resmi beserta foto hasil.</p>
             </div>
           </div>
         </section>
 
         {/* FAQ Accordion */}
-        <section style={{ margin: '4rem 0' }}>
-          <h2 style={{ textAlign: 'center', fontSize: '1.6rem', fontWeight: 700, marginBottom: '2rem' }}>
+        <section className="landing-faq-section animate-fade-in">
+          <h2 className="section-title-center">
             Pertanyaan Umum (FAQ)
           </h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxWidth: '800px', margin: '0 auto' }}>
+          <div className="faq-list">
             {faqs.map((faq, idx) => (
               <div
                 key={idx}
+                className={`faq-item ${openFaq === idx ? 'open' : ''}`}
                 onClick={() => toggleFaq(idx)}
-                style={{
-                  background: 'var(--lm-surface0)',
-                  border: '1px solid var(--lm-surface1)',
-                  borderRadius: 'var(--lm-radius)',
-                  padding: '1.25rem',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease'
-                }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontWeight: 600 }}>
+                <div className="faq-question">
                   <span>{faq.q}</span>
-                  <ChevronDown size={18} style={{ transform: openFaq === idx ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.2s ease' }} />
+                  <ChevronDown size={18} className="faq-chevron" />
                 </div>
                 {openFaq === idx && (
-                  <p style={{ marginTop: '0.85rem', marginBottom: 0, color: 'var(--lm-subtext0)', fontSize: '0.9rem', lineHeight: '1.6' }}>
+                  <p className="faq-answer">
                     {faq.a}
                   </p>
                 )}

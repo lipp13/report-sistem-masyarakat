@@ -61,7 +61,7 @@ const Dashboard = () => {
       <Navbar />
       <main className="main-content">
         {/* Header & Stats Banner */}
-        <section className="stats-section">
+        <section className="stats-section animate-fade-in">
           <div className="stats-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.5rem' }}>
             <div>
               <h1 className="page-title">Dashboard Pengaduan</h1>
@@ -89,7 +89,7 @@ const Dashboard = () => {
                   <span className="stat-label">Menunggu</span>
                 </div>
               </div>
-              <div className="stat-card" style={{ background: 'rgba(148, 226, 213, 0.1)', border: '1px solid rgba(148, 226, 213, 0.3)' }}>
+              <div className="stat-card stat-progress" style={{ background: 'rgba(45, 212, 191, 0.1)', border: '1px solid rgba(45, 212, 191, 0.25)' }}>
                 <div className="stat-icon">⚡</div>
                 <div className="stat-info">
                   <span className="stat-num" style={{ color: 'var(--lm-teal)' }}>{stats.in_progress || 0}</span>
@@ -108,7 +108,7 @@ const Dashboard = () => {
         </section>
 
         {/* Filters & View Switcher */}
-        <section className="filters-section" style={{ marginTop: '1.5rem' }}>
+        <section className="filters-section animate-fade-in animate-delay-1" style={{ marginTop: '1.5rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem' }}>
             <form className="search-bar" onSubmit={handleSearch} style={{ flex: 1, minWidth: '260px' }}>
               <Search size={18} color="var(--lm-overlay)" />
@@ -130,9 +130,9 @@ const Dashboard = () => {
                   onChange={(e) => handleFilter('sort', e.target.value)}
                   style={{ background: 'transparent', border: 'none', color: 'var(--lm-text)', fontSize: '0.85rem', outline: 'none', cursor: 'pointer' }}
                 >
-                  <option value="latest" style={{ background: '#1e1e2e' }}>Terbaru</option>
-                  <option value="popular" style={{ background: '#1e1e2e' }}>Terpopuler (Banyak Suara)</option>
-                  <option value="oldest" style={{ background: '#1e1e2e' }}>Terlama</option>
+                  <option value="latest" style={{ background: 'var(--lm-surface0)' }}>Terbaru</option>
+                  <option value="popular" style={{ background: 'var(--lm-surface0)' }}>Terpopuler (Banyak Suara)</option>
+                  <option value="oldest" style={{ background: 'var(--lm-surface0)' }}>Terlama</option>
                 </select>
               </div>
 

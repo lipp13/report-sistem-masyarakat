@@ -40,7 +40,7 @@ const ReportCard = ({ report, onVoteSuccess }) => {
   };
 
   return (
-    <div className="report-card" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <div className="report-card animate-fade-in" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <Link to={`/reports/${report.id}`} style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}>
         {imageUrl ? (
           <div className="card-image">

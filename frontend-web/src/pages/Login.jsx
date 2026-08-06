@@ -53,7 +53,7 @@ const Login = () => {
         <div className="auth-bg-circle c3"></div>
       </div>
 
-      <div className="auth-card">
+      <div className="auth-card animate-fade-in">
         <div className="auth-header">
           <div className="auth-logo">🏛️</div>
           <h1 className="auth-title">LaporMas</h1>

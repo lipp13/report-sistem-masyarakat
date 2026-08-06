@@ -1,32 +1,31 @@
 /**
- * Token desain LaporMas — sama dengan variabel CSS di frontend-web (index.css :root).
+ * Token desain LaporMas — Civic Dark Pro Theme (selaras 100% dengan index.css :root).
  */
 export const theme = {
-  base: '#11111b',
-  mantle: '#181825',
-  surface0: '#1e1e2e',
-  surface1: '#313244',
-  surface2: '#45475a',
-  overlay: '#6c7086',
-  subtext0: '#a6adc8',
-  text: '#cdd6f4',
-  lavender: '#b4befe',
-  blue: '#89b4fa',
-  green: '#a6e3a1',
-  peach: '#fab387',
-  red: '#f38ba8',
-  yellow: '#f9e2af',
-  pink: '#f5c2e7',
-  mauve: '#cba6f7',
-  teal: '#94e2d5',
-  radius: 12,
+  base: '#0b0f17',
+  mantle: '#111723',
+  surface0: '#182030',
+  surface1: '#222d42',
+  surface2: '#313e59',
+  overlay: '#64748b',
+  subtext0: '#94a3b8',
+  text: '#f1f5f9',
+  lavender: '#818cf8',
+  blue: '#38bdf8',
+  green: '#34d399',
+  peach: '#fb923c',
+  red: '#f87171',
+  yellow: '#facc15',
+  pink: '#f472b6',
+  mauve: '#c084fc',
+  teal: '#2dd4bf',
+  radius: 14,
   radiusSm: 10,
-  radiusLg: 16,
+  radiusLg: 18,
   radiusFull: 999,
 };
 
 export const fonts = {
-  /** Fallback sistem mendekati Plus Jakarta di web */
   regular: 'System',
   medium: 'System',
   semiBold: 'System',

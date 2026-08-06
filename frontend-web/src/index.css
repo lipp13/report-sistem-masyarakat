@@ -1,28 +1,71 @@
-/* LaporMas — design system (font di-load dari index.html; selaras dengan mobile) */
+/* LaporMas — Civic Dark Pro Design System */
 :root {
-  --lm-base: #11111b;
-  --lm-mantle: #181825;
-  --lm-surface0: #1e1e2e;
-  --lm-surface1: #313244;
-  --lm-surface2: #45475a;
-  --lm-overlay: #6c7086;
-  --lm-subtext0: #a6adc8;
-  --lm-text: #cdd6f4;
-  --lm-lavender: #b4befe;
-  --lm-blue: #89b4fa;
-  --lm-green: #a6e3a1;
-  --lm-peach: #fab387;
-  --lm-red: #f38ba8;
-  --lm-yellow: #f9e2af;
-  --lm-pink: #f5c2e7;
-  --lm-mauve: #cba6f7;
-  --lm-teal: #94e2d5;
-  --lm-radius: 12px;
+  --lm-base: #0b0f17;
+  --lm-mantle: #111723;
+  --lm-surface0: #182030;
+  --lm-surface1: #222d42;
+  --lm-surface2: #313e59;
+  --lm-overlay: #64748b;
+  --lm-subtext0: #94a3b8;
+  --lm-text: #f1f5f9;
+  --lm-lavender: #818cf8;
+  --lm-blue: #38bdf8;
+  --lm-green: #34d399;
+  --lm-peach: #fb923c;
+  --lm-red: #f87171;
+  --lm-yellow: #facc15;
+  --lm-pink: #f472b6;
+  --lm-mauve: #c084fc;
+  --lm-teal: #2dd4bf;
+  --lm-radius: 14px;
   --lm-radius-sm: 10px;
-  --lm-radius-lg: 16px;
-  --lm-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
-  --lm-font: "Plus Jakarta Sans", system-ui, "Segoe UI", Roboto, sans-serif;
+  --lm-radius-lg: 20px;
+  --lm-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5), 0 0 1px 1px rgba(255, 255, 255, 0.05);
+  --lm-glow-blue: 0 0 25px rgba(56, 189, 248, 0.25);
+  --lm-glow-teal: 0 0 25px rgba(45, 212, 191, 0.25);
+  --lm-font: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
 }
+
+/* ——— Keyframes & Micro-Animations ——— */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.4;
+  }
+  50% {
+    transform: scale(1.08);
+    opacity: 0.65;
+  }
+}
+
+@keyframes floatSlow {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(1deg); }
+}
+
+.animate-fade-in {
+  animation: fadeInUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-delay-1 { animation-delay: 0.1s; }
+.animate-delay-2 { animation-delay: 0.2s; }
+.animate-delay-3 { animation-delay: 0.3s; }
 
 *,
 *::before,
@@ -33,6 +76,7 @@
 html {
   font-size: 16px;
   -webkit-font-smoothing: antialiased;
+  scroll-behavior: smooth;
 }
 
 body {
@@ -42,6 +86,7 @@ body {
   color: var(--lm-text);
   line-height: 1.5;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 #root {
@@ -1888,7 +1933,7 @@ a:hover {
 }
 
 .landing-accent {
-  background: linear-gradient(135deg, var(--lm-blue), var(--lm-lavender));
+  background: linear-gradient(135deg, var(--lm-blue) 0%, var(--lm-teal) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -1919,11 +1964,87 @@ a:hover {
   font-size: 0.9rem;
 }
 
-.landing-features-title {
-  margin: 0 0 1.25rem;
-  font-size: 1.35rem;
-  font-weight: 700;
+/* ——— Stats Section ——— */
+.landing-stats-grid {
+  margin: 3rem 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
+}
+
+.stat-card-glass {
+  background: rgba(24, 32, 48, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 1.35rem;
+  border-radius: var(--lm-radius);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.stat-card-glass:hover {
+  transform: translateY(-3px);
+  border-color: var(--lm-blue);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35), var(--lm-glow-blue);
+}
+
+.stat-card-inner {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.stat-icon-wrapper {
+  padding: 0.7rem;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stat-icon-blue {
+  background: rgba(56, 189, 248, 0.15);
+  color: var(--lm-blue);
+}
+
+.stat-icon-green {
+  background: rgba(52, 211, 153, 0.15);
+  color: var(--lm-green);
+}
+
+.stat-icon-lavender {
+  background: rgba(129, 140, 248, 0.15);
+  color: var(--lm-lavender);
+}
+
+.stat-number {
+  font-size: 1.85rem;
+  font-weight: 800;
   color: var(--lm-text);
+  line-height: 1.1;
+}
+
+.stat-green { color: var(--lm-green); }
+.stat-lavender { color: var(--lm-lavender); }
+
+.stat-label-text {
+  font-size: 0.85rem;
+  color: var(--lm-subtext0);
+  margin-top: 0.15rem;
+}
+
+/* ——— Feature Highlights ——— */
+.landing-features {
+  margin: 4rem 0;
+}
+
+.landing-features-title {
+  margin: 0 0 1.5rem;
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--lm-text);
+  letter-spacing: -0.02em;
 }
 
 .landing-feature-grid {
@@ -1931,43 +2052,162 @@ a:hover {
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.25rem;
 }
 
 .landing-feature-card {
   background: var(--lm-surface0);
   border: 1px solid var(--lm-surface1);
   border-radius: var(--lm-radius);
-  padding: 1.25rem 1.15rem;
-  transition:
-    border-color 0.18s,
-    transform 0.18s;
+  padding: 1.5rem 1.25rem;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .landing-feature-card:hover {
-  border-color: var(--lm-surface2);
-  transform: translateY(-2px);
+  border-color: var(--lm-teal);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3), var(--lm-glow-teal);
 }
 
 .landing-feature-icon {
   font-size: 1.75rem;
-  display: block;
-  margin-bottom: 0.65rem;
+  display: inline-block;
+  margin-bottom: 0.85rem;
 }
 
 .landing-feature-card h3 {
-  margin: 0 0 0.4rem;
-  font-size: 1rem;
+  margin: 0 0 0.45rem;
+  font-size: 1.05rem;
   font-weight: 700;
   color: var(--lm-text);
 }
 
 .landing-feature-card p {
   margin: 0;
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   color: var(--lm-subtext0);
-  line-height: 1.55;
+  line-height: 1.6;
+}
+
+/* ——— Step-by-Step Guide ——— */
+.landing-steps-section {
+  margin: 4.5rem 0 3.5rem;
+}
+
+.section-title-center {
+  text-align: center;
+  font-size: 1.65rem;
+  font-weight: 800;
+  margin-bottom: 2.25rem;
+  color: var(--lm-text);
+  letter-spacing: -0.02em;
+}
+
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+}
+
+.step-card {
+  background: var(--lm-surface0);
+  padding: 1.65rem;
+  border-radius: var(--lm-radius);
+  border: 1px solid var(--lm-surface1);
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.step-card:hover {
+  border-color: var(--lm-surface2);
+  transform: translateY(-2px);
+}
+
+.step-number {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  color: var(--lm-base);
+  font-weight: 800;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.step-number-1 { background: var(--lm-blue); }
+.step-number-2 { background: var(--lm-teal); }
+.step-number-3 { background: var(--lm-green); }
+
+.step-card h4 {
+  margin: 0 0 0.5rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.step-card p {
+  margin: 0;
+  color: var(--lm-subtext0);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+/* ——— FAQ Accordion ——— */
+.landing-faq-section {
+  margin: 4.5rem 0;
+}
+
+.faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.faq-item {
+  background: var(--lm-surface0);
+  border: 1px solid var(--lm-surface1);
+  border-radius: var(--lm-radius);
+  padding: 1.25rem 1.4rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.faq-item:hover {
+  border-color: var(--lm-surface2);
+  background: var(--lm-mantle);
+}
+
+.faq-question {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  font-size: 0.98rem;
+  color: var(--lm-text);
+}
+
+.faq-chevron {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  color: var(--lm-subtext0);
+}
+
+.faq-item.open .faq-chevron {
+  transform: rotate(180deg);
+  color: var(--lm-blue);
+}
+
+.faq-answer {
+  margin-top: 0.85rem;
+  margin-bottom: 0;
+  color: var(--lm-subtext0);
+  font-size: 0.92rem;
+  line-height: 1.65;
+  animation: fadeIn 0.2s ease;
 }
 
 .landing-footer {
