@@ -128,7 +128,19 @@ const start = async () => {
       console.log(`📂 API Health: http://localhost:${PORT}/api/health`);
     });
   } catch (error) {
-    console.error('❌ Failed to start server:', error);
+    if (error.code === 'ECONNREFUSED' || error.name === 'SequelizeConnectionRefusedError') {
+      console.error(`❌ GAGAL KONEKSI DATABASE: MySQL Server tidak merespon di ${process.env.DB_HOST || 'localhost'}:${process.env.DB_PORT || 3306}`);
+      console.error('💡 CARA MENGATASI PADA DASHBOARD RENDER / RAILWAY / CLOUD:');
+      console.error('   Harap tambahkan Environment Variables kredensial MySQL berikut pada Dashboard Cloud Anda:');
+      console.error('   1. DB_HOST     = (Hostname database MySQL cloud Anda)');
+      console.error('   2. DB_PORT     = (Port MySQL, contoh: 3306 atau 25060)');
+      console.error('   3. DB_USER     = (User database)');
+      console.error('   4. DB_PASSWORD = (Password database)');
+      console.error('   5. DB_NAME     = (Nama database, contoh: pengaduan_masyarakat)');
+      console.error('   ATAU isi DATABASE_URL (contoh: mysql://user:password@host:port/dbname)');
+    } else {
+      console.error('❌ Failed to start server:', error);
+    }
     process.exit(1);
   }
 };
